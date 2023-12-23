@@ -1,9 +1,10 @@
 import os
 import pprint as pp
 import logging
+from matplotlib import pyplot as plt
+
 from oemof.thermal_building_model.helpers.path_helper import get_project_root
 from oemof.thermal_building_model.helpers import calculate_gain_by_sun
-from matplotlib import pyplot as plt
 from oemof.thermal_building_model.tabula.tabula_reader import Building
 from oemof.thermal_building_model.m_5RC import M5RC
 

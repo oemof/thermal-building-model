@@ -1,49 +1,45 @@
 |badge_pypi| |badge_travis| |badge_docs| |badge_coverage| |link-latest-doi|
 
 #############
-oemof.thermal
+oemof.thermal_building_model
 #############
 
-This package provides tools to model thermal energy components as an extension of
-oemof.solph, e.g. compression heat pumps, concentrating solar plants, thermal
-storages and solar thermal collectors.
+This package provides tools to model thermal building models as an extension of
+oemof.solph.
 
 .. contents::
 
 About
 =====
 
-The aim of oemof.thermal is to create a toolbox for building models of
-thermal energy systems. Modeling thermal energy systems requires specific preprocessing
-and postprocessing steps whose detail exceeds the generic formulation of components in
-oemof.solph. Currently, most of the functions collected here are intended to be used
-together with oemof.solph. However, in some instances they may be useful independently
-of oemof.solph.
+The aim of oemof.thermal_building_model is to create easily
+for 20 european countries a building model
+with three retrofit status. The energy system of the building model
+can be optimized for a specific retrofit status, by using the
+thermal inertia of the building and optimizing the internal air
+temperature.
 
-oemof.thermal is under active development. Contributions are welcome.
+oemof.thermal_building_model is under active development.
+Contributions are welcome.
 
 Quickstart
 ==========
 
-Install oemof.thermal by running
+Install oemof.thermal_building_model by running
 
 .. code:: bash
 
-    pip install oemof.thermal
+    pip install oemof.thermal_building_model
 
 in your virtualenv. In your code, you can import modules like e.g.:
 
 .. code:: python
 
-    from oemof.thermal import concentrating_solar_power
-
-Also, have a look at the
-`examples <https://github.com/oemof/oemof-thermal/tree/dev/examples>`_.
+    from oemof.thermal_building_model import m_5RC
 
 Documentation
 =============
 
-Find the documentation at `<https://oemof-thermal.readthedocs.io>`_.
 
 Contributing
 ============
@@ -75,24 +71,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
-.. |badge_pypi| image:: https://badge.fury.io/py/oemof.thermal.svg
-    :target: https://badge.fury.io/py/oemof.thermal
-    :alt: PyPI version
-
-.. |badge_docs| image:: https://readthedocs.org/projects/oemof-thermal/badge/?version=stable
-    :target: https://oemof-thermal.readthedocs.io/en/stable/
-    :alt: Documentation status
-
-.. |badge_coverage| image:: https://coveralls.io/repos/github/oemof/oemof-thermal/badge.svg?branch=dev&service=github
-    :target: https://coveralls.io/github/oemof/oemof-thermal?branch=dev
-    :alt: Test coverage
-
-.. |badge_travis| image:: https://travis-ci.org/oemof/oemof.svg?branch=dev
-    :target: https://travis-ci.org/oemof/oemof-thermal
-    :alt: Build status
-
-.. |link-latest-doi| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3606385.svg
-    :target: https://doi.org/10.5281/zenodo.3606385
-    :alt: Zenodo DOI
