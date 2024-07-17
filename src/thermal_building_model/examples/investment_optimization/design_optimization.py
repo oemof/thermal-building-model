@@ -5,15 +5,15 @@ import logging
 import pandas as pd
 import pickle
 
-from oemof.thermal_building_model.tabula.tabula_reader import Building
-from oemof.thermal_building_model.helpers.path_helper import get_project_root
-from oemof.thermal_building_model.helpers import calculate_gain_by_sun
+from thermal_building_model.tabula.tabula_reader import Building
+from thermal_building_model.helpers.path_helper import get_project_root
+from thermal_building_model.helpers import calculate_gain_by_sun
 
 import oemof.solph as solph
 from oemof.solph import views
 from oemof.tools import logger
 from oemof.tools import economics
-from oemof.thermal_building_model.m_5RC import M5RC
+from thermal_building_model.m_5RC import M5RC
 from plot_results import plot_stacked_bars
 
 """

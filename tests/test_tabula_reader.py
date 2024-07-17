@@ -1,4 +1,4 @@
-from oemof.thermal_building_model.tabula.tabula_reader import Building
+from thermal_building_model.tabula.tabula_reader import Building
 
 def test_tabula_reader():
     number_of_time_steps = 100

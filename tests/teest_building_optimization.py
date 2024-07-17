@@ -1,5 +1,5 @@
-from oemof.thermal_building_model.tabula.tabula_reader import Building
-from oemof.thermal_building_model.m_5RC import M5RC
+from thermal_building_model.tabula.tabula_reader import Building
+from thermal_building_model.m_5RC import M5RC
 
 from oemof.solph import views
 import oemof.solph as solph
