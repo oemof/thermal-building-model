@@ -335,8 +335,8 @@ class GenericBuildingBlock(ScalarBlock):
             of every storage n and every timestep.
             """
             t_m_last_ts = block.t_m_ts[n, t]
-            phi_hc_heat = m.flow[i[n], n, p, t]
-            phi_hc_cool = m.flow[n, o[n], p, t]
+            phi_hc_heat = m.flow[i[n], n, t]
+            phi_hc_cool = m.flow[n, o[n], t]
             phi_hc_nd = phi_hc_heat - phi_hc_cool
 
             phi_m_tot = (
@@ -367,8 +367,8 @@ class GenericBuildingBlock(ScalarBlock):
             Rule definition for the building temperature t_air
             of every storage n and every timestep.
             """
-            phi_hc_heat = m.flow[i[n], n, p, t]
-            phi_hc_cool = m.flow[n, o[n], p, t]
+            phi_hc_heat = m.flow[i[n], n, t]
+            phi_hc_cool = m.flow[n, o[n], t]
             phi_hc_nd = phi_hc_heat - phi_hc_cool
             t_m_last_ts = block.t_m_ts[n, t]
             t_m_current_ts = block.t_m_ts[n, t + 1]
