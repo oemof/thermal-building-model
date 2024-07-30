@@ -70,8 +70,12 @@ def main():
 
     # Internal gains of residents, machines (f.e. fridge, computer,...) and lights have to be added manually
     internal_gains = []
+    t_set_heating = []
+    t_set_cooling = []
     for _ in range(number_of_time_steps):
         internal_gains.append(0)
+        t_set_heating.append(20)
+        t_set_cooling.append(20)
 
     # initiate the logger (see the API docs for more information)
     logger.define_logging(

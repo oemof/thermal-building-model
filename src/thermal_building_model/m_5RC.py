@@ -76,11 +76,11 @@ class M5RC(network.Node):
         t_outside: List,
         solar_gains: List,
         internal_gains: List,
+        t_set_heating: List | float,
+        t_set_cooling: List | float,
         inputs=None,
         outputs=None,
         phi_m_tot: float = 0,
-        t_set_heating: float = 20,
-        t_set_cooling: float = 40,
         t_inital: float = 20,
         t_m: float = 20,
         t_m_ts: float = 20,
@@ -300,9 +300,17 @@ class GenericBuildingBlock(ScalarBlock):
             Rule definition for bounds of internal_temperature/t_air variable of
             storage n in timestep t.
             """
+            if isinstance(n.t_set_heating, (float, int)):
+                t_set_heating = n.t_set_heating
+            elif isinstance(n.t_set_heating, List):
+                t_set_heating = n.t_set_heating[t]
+            if isinstance(n.t_set_cooling, (float, int)):
+                t_set_cooling = n.t_set_cooling
+            elif isinstance(n.t_set_cooling, List):
+                t_set_cooling = n.t_set_cooling[t]
             bounds = (
-                n.t_set_heating,
-                n.t_set_cooling,
+                t_set_heating,
+                t_set_cooling,
             )
             return bounds
 
