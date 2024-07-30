@@ -181,7 +181,10 @@ class Building:
             "very heavy": {"a_m_var": 3.0, "c_m_var": 370000},
         }
         self.building_config = {}
-
+        if self.building_parameters is not None:
+            self.initialize_from_building_parameters()
+        else:
+            self.get_building_parameters_from_csv()
     def define_tabula_building_code(
         self,
         country: str,
@@ -229,10 +232,6 @@ class Building:
         return self.tabula_df["Code_BuildingVariant"]
 
     def calculate_all_parameters(self):
-        if self.building_parameters is not None:
-            self.initialize_from_building_parameters()
-        else:
-            self.get_building_parameters_from_csv()
         self.total_internal_area: float = self.calc_internal_area()
         self.h_ve: float = self.calc_h_ve()
         self.h_tr_w: float = self.calc_h_tr_w()
