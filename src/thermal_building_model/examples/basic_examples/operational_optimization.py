@@ -35,17 +35,25 @@ __license__ = "MIT"
 
 def main():
     #  create solver
-    solver = "cbc"  # 'glpk', 'gurobi',....
+    solver = "gurobi"  # 'glpk', 'gurobi',....
     solver_verbose = False  # show/hide solver output
     number_of_time_steps = 8760
     main_path = get_project_root()
     building_example = None
 
+    pv_data = pd.read_csv(
+        os.path.join(
+            main_path,
+            "thermal_building_model",
+            "input",
+            "sfh_example",
+            "pvwatts_hourly_1kW.csv",
+        )
+    )
     # Generates 5RC Building-Model
     building_example = Building(
         country="DE",
         construction_year=1980,
-        floor_area=200,
         class_building="average",
         building_type="SFH",
         refurbishment_status="no_refurbishment",
@@ -72,10 +80,10 @@ def main():
     internal_gains = []
     t_set_heating = []
     t_set_cooling = []
-    for _ in range(number_of_time_steps):
+    for _ in range(number_of_time_steps + 1):
         internal_gains.append(0)
         t_set_heating.append(20)
-        t_set_cooling.append(20)
+        t_set_cooling.append(40)
 
     # initiate the logger (see the API docs for more information)
     logger.define_logging(
@@ -116,7 +124,7 @@ def main():
         solph.components.Transformer(
             label="ElectricalHeater",
             inputs={b_elect: solph.flows.Flow()},
-            outputs={b_heat: solph.flows.Flow(nominal_value=10000)},
+            outputs={b_heat: solph.flows.Flow(nominal_value=20000)},
             conversion_factors={b_elect: 1},
         )
     )
@@ -124,26 +132,36 @@ def main():
         solph.components.Transformer(
             label="ElectricalCooler",
             inputs={
-                b_cool: solph.flows.Flow(nominal_value=10000),
+                b_cool: solph.flows.Flow(nominal_value=20000),
                 b_elect: solph.flows.Flow(),
             },
             outputs={},
-            conversion_factors={b_cool: 1, b_elect: 1},
+            conversion_factors={b_cool: 0.9, b_elect: 1},
         )
     )
 
+    es.add(solph.components.Source(
+        label="pv",
+        outputs={
+            b_elect: solph.Flow(
+                fix=pv_data["AC System Output (W)"],
+                nominal_value= 10
+                ),}
+            ))
     es.add(
         M5RC(
             label="GenericBuilding",
             inputs={b_heat: solph.flows.Flow(variable_costs=0)},
-            outputs={b_cool: solph.flows.Flow(variable_costs=0)},
+            outputs={b_cool: solph.flows.Flow(variable_costs=5)},
             solar_gains=solar_gains,
             t_outside=t_outside,
             internal_gains=internal_gains,
-            t_set_heating=20,
-            t_set_cooling=30,
+            t_set_heating=t_set_heating,
+            t_set_cooling=t_set_cooling,
             building_config=building_example.building_config,
             t_inital=20,
+            max_power_heating = 20000,
+            max_power_cooling = 20000,
         )
     )
 
@@ -158,7 +176,7 @@ def main():
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
+    model.solve(solver='gurobi')
 
     logging.info("Store the energy system with the results.")
 
@@ -170,7 +188,6 @@ def main():
     es.results["meta"] = solph.processing.meta_results(model)
     results = es.results["main"]
     custom_building = views.node(results, "GenericBuilding")
-
     fig, ax = plt.subplots(figsize=(10, 5))
     custom_building["sequences"][(("GenericBuilding", "None"), "t_air")].plot(
         ax=ax, kind="line", drawstyle="steps-post"
