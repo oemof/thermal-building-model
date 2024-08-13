@@ -2,6 +2,7 @@ import os
 import pprint as pp
 import logging
 from matplotlib import pyplot as plt
+import pandas as pd
 
 from thermal_building_model.helpers.path_helper import get_project_root
 from thermal_building_model.helpers import calculate_gain_by_sun
@@ -160,8 +161,6 @@ def main():
             t_set_cooling=t_set_cooling,
             building_config=building_example.building_config,
             t_inital=20,
-            max_power_heating = 20000,
-            max_power_cooling = 20000,
         )
     )
 

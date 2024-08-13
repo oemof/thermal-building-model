@@ -79,8 +79,6 @@ class M5RC(network.Node):
         internal_gains: List,
         t_set_heating: List | float,
         t_set_cooling: List | float,
-        max_power_heating: float,
-        max_power_cooling: float,
         inputs=None,
         outputs=None,
         phi_m_tot: float = 0,
@@ -104,8 +102,6 @@ class M5RC(network.Node):
         self.t_inital = t_inital
         self.t_m = t_m
         self.t_m_ts = t_m_ts
-        self.max_power_heating = max_power_heating
-        self.max_power_cooling = max_power_cooling
         self.floor_area = self.building_config.floor_area  # [m2] Floor Area
         self.mass_area = (
             self.building_config.mass_area
