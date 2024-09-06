@@ -528,7 +528,7 @@ class Building:
             self.list_class_buildig[self.class_building]["c_m_var"]
         return c_m
 
-    def calc_solar_gaings_through_windows(self, object_location_of_building):
+    def calc_solar_gaings_through_windows(self, object_location_of_building,t_outside):
         a_window_total = 0
         g_gl_n_window_avg = 0
         for x in range(1, len(self.u_window) + 1):
@@ -554,6 +554,15 @@ class Building:
         }
         list_solar_gains = []
         for hour in range(self.number_of_time_steps):
+            if True:
+                if t_outside[hour] > 24:
+                    shading_factor = 0.3
+                elif t_outside[hour] > 25:
+                    shading_factor = 0.7
+                elif t_outside[hour]>27:
+                    shading_factor = 0.95
+                else:
+                    shading_factor=0
             sum_solar_gains = 0
             for x in compass_directions:
                 (
@@ -587,6 +596,6 @@ class Building:
                         hour
                     ],
                 )
-                sum_solar_gains = window_var.solar_gains + sum_solar_gains
+                sum_solar_gains = window_var.solar_gains * (1 - shading_factor) + sum_solar_gains
             list_solar_gains.append(sum_solar_gains)
         return list_solar_gains
