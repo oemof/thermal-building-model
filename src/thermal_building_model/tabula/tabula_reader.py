@@ -491,7 +491,7 @@ class Building:
                 + self.a_window["a_window_" + str(x)]
                 * self.u_window["u_window_" + str(x)]
             )
-            a_window = a_window * self.a_window["a_window_" + str(x)]
+            a_window = a_window + self.a_window["a_window_" + str(x)]
         h_tr_w = (
             h_tr_w
             + self.delta_u_thermal_bridiging["delta_u_thermal_bridiging"] * a_window

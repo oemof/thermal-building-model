@@ -83,7 +83,7 @@ def main():
     t_set_heating = []
     t_set_cooling = []
     for _ in range(number_of_time_steps + 1):
-        internal_gains.append(0)
+        internal_gains.append(3446 * 1000 /8760)
         t_set_heating.append(20)
         t_set_cooling.append(40)
 

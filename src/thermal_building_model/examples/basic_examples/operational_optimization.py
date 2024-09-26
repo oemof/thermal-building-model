@@ -55,7 +55,7 @@ def main():
     building_example = Building(
         country="DE",
         construction_year=1980,
-        class_building="heavy",
+        class_building="average",
         building_type="SFH",
         refurbishment_status="no_refurbishment",
         number_of_time_steps=number_of_time_steps,
@@ -83,7 +83,7 @@ def main():
     t_set_heating = []
     t_set_cooling = []
     for _ in range(number_of_time_steps + 1):
-        internal_gains.append(0)
+        internal_gains.append(3446 * 1000 /8760)
         t_set_heating.append(20)
         t_set_cooling.append(40)
 
@@ -141,7 +141,7 @@ def main():
             conversion_factors={b_cool: 0.9, b_elect: 1},
         )
     )
-
+    '''
     es.add(solph.components.Source(
         label="pv",
         outputs={
@@ -150,6 +150,7 @@ def main():
                 nominal_value= 10
                 ),}
             ))
+    '''
     es.add(
         M5RC(
             label="GenericBuilding",
@@ -187,7 +188,15 @@ def main():
     es.results["main"] = solph.processing.results(model)
     es.results["meta"] = solph.processing.meta_results(model)
     results = es.results["main"]
+
+
     custom_building = views.node(results, "GenericBuilding")
+    heating_demand = custom_building["sequences"][(("b_heat", "GenericBuilding"), "flow")].sum()
+    floor_area = building_example.floor_area
+    relative_heating_demand= heating_demand / floor_area
+    print("sum heating demand relative to area: "+str(relative_heating_demand))
+    plt.plot(t_outside)
+    plt.show()
     fig, ax = plt.subplots(figsize=(10, 5))
     custom_building["sequences"][(("GenericBuilding", "None"), "t_air")].plot(
         ax=ax, kind="line", drawstyle="steps-post"
