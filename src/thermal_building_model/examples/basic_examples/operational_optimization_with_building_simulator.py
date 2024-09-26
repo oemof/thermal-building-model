@@ -71,10 +71,12 @@ def main():
             "12_BW_Mannheim_TRY2035.csv",
         ),
     )
-    solar_gains = building_example.calc_solar_gaings_through_windows(
-        object_location_of_building=location
-    )
     t_outside = location.weather_data["drybulb_C"].to_list()
+    solar_gains = building_example.calc_solar_gaings_through_windows(
+        object_location_of_building=location,
+        t_outside = t_outside
+    )
+
 
     # Internal gains of residents, machines (f.e. fridge, computer,...) and lights have to be added manually
     internal_gains = []

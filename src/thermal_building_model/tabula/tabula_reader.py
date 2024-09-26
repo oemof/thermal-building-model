@@ -362,6 +362,9 @@ class Building:
             "g_gl_n_window_1": float(row["g_gl_n_Window_1"].values[0]),
             "g_gl_n_window_2": float(row["g_gl_n_Window_2"].values[0]),
         }
+        self.radiation_non_perpendicular_to_the_glazing = float(row["F_w"].values[0])
+
+        self.frame_area_fraction_of_window = float(row["F_f"].values[0])
 
         self.heat_transfer_coefficient_ventilation = float(
             row["h_Ventilation"].values[0]
@@ -471,6 +474,8 @@ class Building:
                               str(x)] * self.u_door["u_door_" + str(x)]
             )
             a_external = a_external + self.a_door["a_door_" + str(x)]
+        for x in range(1, len(self.a_window) + 1):
+            a_external = a_external + self.a_window["a_window_" + str(x)]
         h_tr_em = (
             h_tr_em
             + self.delta_u_thermal_bridiging["delta_u_thermal_bridiging"] * a_external
@@ -553,27 +558,20 @@ class Building:
             "horizontal": {"azimuth_tilt": 0, "alititude_tilt": 0},
         }
         list_solar_gains = []
+        (
+            altitude,
+            azimuth,
+            apparent_zenith
+        ) = object_location_of_building.calc_sun_position_pv_lib(
+            latitude_deg=object_location_of_building.weather_data_latitude_and_longitude['latitude'],
+            longitude_deg=object_location_of_building.weather_data_latitude_and_longitude['longitude'],
+            index=object_location_of_building.weather_data['dirnorrad_Whm2'].index
+        )
         for hour in range(self.number_of_time_steps):
-            if True:
-                if t_outside[hour] > 24:
-                    shading_factor = 0.3
-                elif t_outside[hour] > 25:
-                    shading_factor = 0.7
-                elif t_outside[hour]>27:
-                    shading_factor = 0.95
-                else:
-                    shading_factor=0
+            shading_factor=0
             sum_solar_gains = 0
             for x in compass_directions:
-                (
-                    altitude,
-                    azimuth,
-                ) = object_location_of_building.calc_sun_position(
-                    latitude_deg=48.16,
-                    longitude_deg=46.38,
-                    year=2015,
-                    hoy=hour,
-                )
+
                 azimuth_tilt = compass_directions[x]["azimuth_tilt"]
                 alititude_tilt = compass_directions[x]["alititude_tilt"]
                 window_var = Window(
@@ -582,20 +580,29 @@ class Building:
                     glass_solar_transmittance=g_gl_n_window_avg,
                     glass_light_transmittance=0.8,
                     area=self.a_window_specific["a_window_" + str(x)],
-                )
-
-                window_var.calc_solar_gains(
                     sun_altitude=altitude,
                     sun_azimuth=azimuth,
-                    normal_direct_radiation=object_location_of_building.weather_data[
-                        "dirnorrad_Whm2"
-                    ][hour],
-                    horizontal_diffuse_radiation=object_location_of_building.weather_data[
-                        "difhorrad_Whm2"
-                    ][
-                        hour
-                    ],
+                    reduction_factor=(1 - shading_factor) * \
+                                     (1 - self.frame_area_fraction_of_window) *
+                                     self.radiation_non_perpendicular_to_the_glazing
                 )
-                sum_solar_gains = window_var.solar_gains * (1 - shading_factor) + sum_solar_gains
+                solar_gains = window_var.calc_solar_heat_gains_by_pv(
+                    direct_normal_irradiance = object_location_of_building.weather_data[
+                        "dirnorrad_Whm2"
+                    ],
+                    direct_horizontal_irradiance = object_location_of_building.weather_data[
+                        "difhorrad_Whm2"
+                    ],
+                    direct_normal_irradiance_extra=object_location_of_building.weather_data[
+                        "extdirrad_Whm2"
+                    ],
+                    global_horizontal_irradiance = object_location_of_building.weather_data[
+                        "glohorrad_Whm2"
+                    ],
+                    apparent_zenith = apparent_zenith,
+                    hour = hour)
+
+
+                sum_solar_gains = sum_solar_gains + solar_gains
             list_solar_gains.append(sum_solar_gains)
         return list_solar_gains
