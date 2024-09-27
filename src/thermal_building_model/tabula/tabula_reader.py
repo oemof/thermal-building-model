@@ -8,6 +8,7 @@ from thermal_building_model.helpers.path_helper import get_project_root
 from thermal_building_model.helpers.calculate_gain_by_sun import Window
 import os
 import warnings
+import math
 from dataclasses import dataclass, field, fields
 
 
@@ -31,7 +32,7 @@ class BuildingConfig5RC:
     h_tr_ms : numeric
         Value which describes the transmittance from the internal air to the thermal mass in W/K.
     c_m : numeric
-        Value of room capacitance in kWh/K
+        Value of room capacitance in J/K
     floor_area : numeric
         Value of the floor area in m2.
     heat_transfer_coefficient_ventilation : numeric
@@ -274,13 +275,13 @@ class Building:
         self.opaque_elements = ["wall", "roof", "floor"]
 
         self.floor_area_reference = float(row["A_C_Ref"].values[0])
-        self.calc_floor_area_ratio()
+        self.calc_area_ratio()
         self.a_roof = {
             "a_roof_1": float(row["A_Roof_1"].values[0]),
             "a_roof_2": float(row["A_Roof_2"].values[0]),
         }
         self.a_roof = {
-            key: value * self.floor_area_ratio for key, value in self.a_roof.items()
+            key: value * self.floor_roof_area_ratio for key, value in self.a_roof.items()
         }
         self.u_roof = {
             "u_roof_1": float(row["U_" + str(t_b) + "Roof_1"].values[0]),
@@ -295,7 +296,7 @@ class Building:
             "a_floor_2": float(row["A_Floor_2"].values[0]),
         }
         self.a_floor = {
-            key: value * self.floor_area_ratio for key, value in self.a_floor.items()
+            key: value * self.floor_roof_area_ratio for key, value in self.a_floor.items()
         }
         self.u_floor = {
             "u_floor_1": float(row["U_" + str(t_b) + "Floor_1"].values[0]),
@@ -312,7 +313,7 @@ class Building:
             "a_wall_3": float(row["A_Wall_3"].values[0]),
         }
         self.a_wall = {
-            key: value * self.floor_area_ratio for key, value in self.a_wall.items()
+            key: value * self.wall_window_area_ratio for key, value in self.a_wall.items()
         }
         self.u_wall = {
             "u_wall_1": float(row["U_" + str(t_b) + "Wall_1"].values[0]),
@@ -327,7 +328,7 @@ class Building:
 
         self.a_door = {"a_door_1": float(row["A_Door_1"].values[0])}
         self.a_door = {
-            key: value * self.floor_area_ratio for key, value in self.a_door.items()
+            key: value * self.wall_window_area_ratio for key, value in self.a_door.items()
         }
 
         self.u_door = {"u_door_1": float(
@@ -338,7 +339,7 @@ class Building:
             "a_window_2": float(row["A_Window_2"].values[0]),
         }
         self.a_window = {
-            key: value * self.floor_area_ratio for key, value in self.a_window.items()
+            key: value * self.wall_window_area_ratio for key, value in self.a_window.items()
         }
         self.a_window_specific = {
             "a_window_horizontal": float(row["A_Window_Horizontal"].values[0]),
@@ -348,7 +349,7 @@ class Building:
             "a_window_north": float(row["A_Window_North"].values[0]),
         }
         self.a_window_specific = {
-            key: value * self.floor_area_ratio
+            key: value * self.wall_window_area_ratio
             for key, value in self.a_window_specific.items()
         }
         self.delta_u_thermal_bridiging = {
@@ -397,32 +398,41 @@ class Building:
         self.h_ventilation = float(
             row["h_Ventilation"] * self.floor_area)  # [W/K]
 
-    def calc_floor_area_ratio(self):
+    def calc_area_ratio(self):
         if self.floor_area is None:
             self.floor_area = self.floor_area_reference
-            self.floor_area_ratio = 1
+            self.floor_roof_area_ratio = 1
+            self.wall_window_area_ratio = 1
         else:
             warnings.warn(
                 "Experimental mode: The floor area is unequeal"
                 "to the tabula reference floor area",
                 UserWarning,
             )
-            self.floor_area_ratio = self.floor_area / self.floor_area_reference
-            if self.floor_area_ratio > 1:
+            self.floor_roof_area_ratio = self.floor_area / self.floor_area_reference
+            # assuming the building is always a cubric:
+            self.wall_window_area_ratio = math.sqrt(self.floor_area) / math.sqrt(self.floor_area_reference)
+            if self.floor_roof_area_ratio > 1:
                 print(
-                    "The chosen floor is "
-                    + str(round((1 - self.floor_area_ratio) * 100, 3))
+                    "The chosen floor and roof is "
+                    + str(round((1 - self.floor_roof_area_ratio) * 100, 3))
+                    + " % and "
+                    "The chosen window and wall is "
+                    + str(round((1 - self.wall_window_area_ratio) * 100, 3))
                     + " % "
                     "bigger than the tabula reference floor area"
                 )
-            elif self.floor_area_ratio < 1:
+            elif self.floor_roof_area_ratio < 1:
                 print(
-                    "The chosen floor is "
-                    + str(round((1 - self.floor_area_ratio) * 100, 3))
+                    "The chosen floor and roof is "
+                    + str(round((1 - self.floor_roof_area_ratio) * 100, 3))
+                    + " % and "
+                    "The chosen window and wall is "
+                    + str(round((1 - self.wall_window_area_ratio) * 100, 3))
                     + " % "
                     "smaller than the tabula reference floor area"
                 )
-            if 0.9 > self.floor_area_ratio or 1.1 < self.floor_area_ratio:
+            if 0.9 > self.floor_roof_area_ratio or 1.1 < self.floor_roof_area_ratio:
                 warnings.warn(
                     "The chosen floor area is more than 10 % different to the "
                     "associated tabula building. It might influence "
