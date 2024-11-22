@@ -36,11 +36,9 @@ __license__ = "MIT"
 
 def main():
     #  create solver
-    solver = "gurobi"  # 'glpk', 'gurobi',....
-    solver_verbose = False  # show/hide solver output
+    solver = "cbc"  # 'glpk', 'gurobi',....
     number_of_time_steps = 8760
     main_path = get_project_root()
-    building_example = None
 
     pv_data = pd.read_csv(
         os.path.join(
@@ -141,7 +139,7 @@ def main():
             conversion_factors={b_cool: 0.9, b_elect: 1},
         )
     )
-    '''
+
     es.add(solph.components.Source(
         label="pv",
         outputs={
@@ -150,7 +148,7 @@ def main():
                 nominal_value= 10
                 ),}
             ))
-    '''
+
     es.add(
         M5RC(
             label="GenericBuilding",
@@ -177,7 +175,7 @@ def main():
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    model.solve(solver='gurobi')
+    model.solve(solver=solver)
 
     logging.info("Store the energy system with the results.")
 
@@ -194,7 +192,7 @@ def main():
     heating_demand = custom_building["sequences"][(("b_heat", "GenericBuilding"), "flow")].sum()
     floor_area = building_example.floor_area
     relative_heating_demand= heating_demand / floor_area
-    print("sum heating demand relative to area: "+str(relative_heating_demand))
+    print("annual heating demand in kWh/m^2: "+str(relative_heating_demand/1000))
     plt.plot(t_outside)
     plt.show()
     fig, ax = plt.subplots(figsize=(10, 5))

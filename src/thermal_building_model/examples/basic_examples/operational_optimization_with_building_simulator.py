@@ -36,11 +36,9 @@ __license__ = "MIT"
 
 def main():
     #  create solver
-    solver = "gurobi"  # 'glpk', 'gurobi',....
-    solver_verbose = False  # show/hide solver output
+    solver = "cbc"  # 'glpk', 'gurobi',....
     number_of_time_steps = 8760
     main_path = get_project_root()
-    building_example = None
     pv_data = pd.read_csv(
         os.path.join(
             main_path,
@@ -163,6 +161,7 @@ def main():
             max_power_heating = 20000,
             max_power_cooling = 20000,
             timesteps = 8760).solve()
+
     es.add(solph.components.Source(
         label="cooling_demand",
         outputs={
@@ -190,28 +189,46 @@ def main():
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    model.solve(solver='gurobi')
+    model.solve(solver=solver)
 
     logging.info("Store the energy system with the results.")
 
-    # The processing module of the outputlib can be used to extract the results
-    # from the model transfer them into a homogeneous structured dictionary.
+    floor_area = building_example.floor_area
+    relative_heating_demand = sum(heating_demand) / floor_area
+
 
     # add results to the energy system to make it possible to store them.
     es.results["main"] = solph.processing.results(model)
     es.results["meta"] = solph.processing.meta_results(model)
     results = es.results["main"]
     custom_building = views.node(results, "GenericBuilding")
-    calc_excess_temperature_degree_hours(t_air)
-    plt.plot(t_air)
-    plt.plot(heating_demand)
-    plt.plot(cooling_demand)
+    print("annual heating demand in kWh/m^2: " + str(relative_heating_demand / 1000))
+
+    # Plot `t_air`
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(t_air, drawstyle="steps-post")
+    ax.set_ylabel("t_air in Celsius")
+    ax.set_title("Temperature over time")
+    plt.show()
+
+    # Plot `heating_demand`
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(heating_demand, drawstyle="steps-post")
+    ax.set_ylabel("Heating demand in Watt")
+    ax.set_title("Heating demand over time")
+    plt.show()
+
+    # Plot `cooling_demand`
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(cooling_demand, drawstyle="steps-post")
+    ax.set_ylabel("Cooling demand in Watt")
+    ax.set_title("Cooling demand over time")
+    plt.show()
 
     # print the solver results
     print("********* Meta results *********")
     pp.pprint(es.results["meta"])
     print("")
-
 
 if __name__ == "__main__":
     main()
